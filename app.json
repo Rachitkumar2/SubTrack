@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "subtrack-expo-temp",
-    "slug": "subtrack-expo-temp",
+    "name": "SubTrack",
+    "slug": "subtrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,15 +11,24 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#BC6037",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundImage": "./assets/android-icon-background.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.rachitk20.subtrack"
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a1796a2e-709d-4bd9-8fc5-3fe00b93d37c"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
