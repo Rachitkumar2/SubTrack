@@ -6,7 +6,7 @@ import { OpenAIIcon } from '../../components/icons/OpenAIIcon';
 import { AdobeIcon } from '../../components/icons/AdobeIcon';
 import { MediumIcon } from '../../components/icons/MediumIcon';
 
-// Subscription card data — colors match StitchMCP HTML reference
+
 const SUBSCRIPTION_CARDS = [
   {
     id: '1',

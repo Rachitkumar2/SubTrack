@@ -8,13 +8,7 @@ import { SubsIcon } from '../components/icons/SubsIcon';
 import { InsightIcon } from '../components/icons/InsightIcon';
 import { SettingsIcon } from '../components/icons/SettingsIcon';
 
-function InsightsTab(): React.JSX.Element {
-  return (
-    <View className="flex-1 bg-background-app items-center justify-center">
-      <Text className="font-app font-bold text-text-primary text-[20px]">Insights</Text>
-    </View>
-  );
-}
+import { MonthlyInsightsScreen } from '../screens/dashboard/MonthlyInsightsScreen';
 
 function SettingsTab(): React.JSX.Element {
   return (
@@ -115,7 +109,7 @@ export function MainTabNavigator(): React.JSX.Element {
       />
       <Tab.Screen
         name="Insights"
-        component={InsightsTab}
+        component={MonthlyInsightsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <View
