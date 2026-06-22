@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "329995856826",
+    "project_id": "subtrack-ai-a2762",
+    "storage_bucket": "subtrack-ai-a2762.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329995856826:android:49d80e419bfb8ac4b94b83",
+        "android_client_info": {
+          "package_name": "com.rachitk20.subtrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329995856826-tqjs3rjcjio7t59qlbvj8hhtsaht5p80.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rachitk20.subtrack",
+            "certificate_hash": "669108473a576c22ad1535d699e5a7a7fff56379"
+          }
+        },
+        {
+          "client_id": "329995856826-eqv5uqqq49a8mf43sfruq3o79c8qpk4c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcWMP-B1BYX-EoJIRbJBILZ12kNiDk8Lw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329995856826-eqv5uqqq49a8mf43sfruq3o79c8qpk4c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

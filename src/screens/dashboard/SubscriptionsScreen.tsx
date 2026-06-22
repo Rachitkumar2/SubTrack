@@ -1,31 +1,14 @@
 /// <reference types="nativewind/types" />
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, MoreHorizontal } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AdobeIcon } from '../../components/icons/AdobeIcon';
 import { Button } from '../../components/common/Button';
-import Animated, { LinearTransition, FadeIn, FadeOut, useAnimatedStyle, withTiming, interpolateColor } from 'react-native-reanimated';
-
-type Subscription = {
-  id: string;
-  name: string;
-  planName: string;
-  price: number;
-  billingCycle: string;
-  bgColor: string;
-  initial: string;
-  hasIcon?: boolean;
-};
-
-const SUBSCRIPTIONS: Subscription[] = [
-  { id: '1', name: 'Dropbox', planName: 'Premium', price: 16.96, billingCycle: '1 month', bgColor: '#9DB9E3', initial: 'D' },
-  { id: '2', name: 'Spotify', planName: 'Family Plan', price: 76.77, billingCycle: '3 months', bgColor: '#1DB954', initial: 'S' },
-  { id: '3', name: 'GitHub Copilot', planName: 'Pro Business', price: 49.99, billingCycle: '1 month', bgColor: '#0C111D', initial: 'G' },
-  { id: '4', name: 'Adobe', planName: 'Family Plan', price: 98.10, billingCycle: '2 months', bgColor: '#FF0000', initial: 'A', hasIcon: true },
-  { id: '5', name: 'Figma', planName: 'Premium', price: 19.23, billingCycle: '1 month', bgColor: '#F24E1E', initial: 'F' },
-];
+import Animated, { LinearTransition, FadeIn, FadeOut, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useSubscriptions } from '../../hooks/useSubscriptions';
+import { Subscription } from '../../types/subscription.types';
 
 const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, isExpanded: boolean, onToggle: () => void }) => {
   const animatedStyle = useAnimatedStyle(() => {
@@ -36,7 +19,7 @@ const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, is
   });
 
   const renderIcon = () => {
-    if (sub.hasIcon && sub.name === 'Adobe') {
+    if (sub.name === 'Adobe') {
       return (
         <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: '#ffdad6', alignItems: 'center', justifyContent: 'center' }}>
           <AdobeIcon size={24} color="#0C111D" />
@@ -44,18 +27,20 @@ const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, is
       );
     }
     
-    // Dynamic icon background based on Figma HTML
-    let iconBg = sub.bgColor;
-    if (sub.name === 'Dropbox') iconBg = '#b8ede3'; // secondary-container
-    if (sub.name === 'Spotify') iconBg = '#161c27'; // on-background
-    if (sub.name === 'GitHub Copilot') iconBg = '#161c27'; // on-surface
-    if (sub.name === 'Figma') iconBg = '#dde2f2'; // surface-container-highest
+    // Dynamic icon background for known brands, fallback to standard app colors
+    let iconBg = '#F5F0E6';
+    let textColor = '#A1401E';
+
+    if (sub.name.toLowerCase().includes('dropbox')) iconBg = '#b8ede3';
+    if (sub.name.toLowerCase().includes('spotify')) iconBg = '#1DB954';
+    if (sub.name.toLowerCase().includes('github')) iconBg = '#161c27';
+    if (sub.name.toLowerCase().includes('figma')) iconBg = '#dde2f2';
 
     return (
-      <View 
-        style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: iconBg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-      >
-        <Text className="text-white font-app font-bold text-[20px]">{sub.initial}</Text>
+      <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: iconBg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <Text className="font-app font-bold text-[20px]" style={{ color: iconBg === '#161c27' || iconBg === '#1DB954' ? '#FFF' : textColor }}>
+          {sub.name.charAt(0).toUpperCase()}
+        </Text>
       </View>
     );
   };
@@ -79,65 +64,41 @@ const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, is
         animatedStyle,
       ]}
     >
-      <TouchableOpacity 
-        activeOpacity={0.9}
-        onPress={onToggle}
-      >
-        {/* Header Row */}
+      <TouchableOpacity activeOpacity={0.9} onPress={onToggle}>
         <View className="flex-row justify-between items-center">
           <View className="flex-row items-center" style={{ gap: 12 }}>
             {renderIcon()}
             <View>
-              <Text 
-                className="font-app text-[18px]" 
-                style={{ fontWeight: '500', color: isExpanded ? '#FFFFFF' : '#161c27', marginBottom: 2 }}
-              >
+              <Text className="font-app text-[18px]" style={{ fontWeight: '500', color: isExpanded ? '#FFFFFF' : '#161c27', marginBottom: 2 }}>
                 {sub.name}
               </Text>
-              <Text 
-                className="font-app text-[12px]" 
-                style={{ fontWeight: '600', color: isExpanded ? '#FFDAD6' : '#57423c' }}
-              >
-                {sub.planName}
+              <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: isExpanded ? '#FFDAD6' : '#57423c' }}>
+                {sub.category}
               </Text>
             </View>
           </View>
-
           <View className="items-end">
-            <Text 
-              className="font-app text-[18px]" 
-              style={{ fontWeight: '500', color: isExpanded ? '#FFFFFF' : '#161c27', marginBottom: 2 }}
-            >
-              ${sub.price}
+            <Text className="font-app text-[18px]" style={{ fontWeight: '500', color: isExpanded ? '#FFFFFF' : '#161c27', marginBottom: 2 }}>
+              ₹{sub.price.toFixed(2)}
             </Text>
-            <Text 
-              className="font-app text-[12px]" 
-              style={{ fontWeight: '600', color: isExpanded ? '#FFDAD6' : '#57423c' }}
-            >
+            <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: isExpanded ? '#FFDAD6' : '#57423c' }}>
               {sub.billingCycle}
             </Text>
           </View>
         </View>
 
-        {/* Expanded Content Area */}
         {isExpanded && (
-          <Animated.View 
-            entering={FadeIn.duration(300).delay(100)} 
-            exiting={FadeOut.duration(200)}
-            style={{ paddingTop: 16, marginTop: 16 }}
-          >
+          <Animated.View entering={FadeIn.duration(300).delay(100)} exiting={FadeOut.duration(200)} style={{ paddingTop: 16, marginTop: 16 }}>
             <View className="flex-row justify-between items-center" style={{ marginBottom: 12 }}>
               <View>
                 <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: '#FFB59D', marginBottom: 4 }}>
-                  Payment info:
+                  Status:
                 </Text>
-                <Text className="font-app text-[14px]" style={{ fontWeight: '500', color: '#FFFFFF' }}>
-                  **** 8530
+                <Text className="font-app text-[14px]" style={{ fontWeight: '500', color: '#FFFFFF', textTransform: 'capitalize' }}>
+                  {sub.status}
                 </Text>
               </View>
-              <TouchableOpacity 
-                style={{ paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'transparent', borderRadius: 9999, borderWidth: 1.5, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}
-              >
+              <TouchableOpacity style={{ paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'transparent', borderRadius: 9999, borderWidth: 1.5, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
                 <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: '#FFFFFF' }}>Manage</Text>
               </TouchableOpacity>
             </View>
@@ -145,15 +106,13 @@ const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, is
             <View className="flex-row justify-between items-center" style={{ marginBottom: 20 }}>
               <View>
                 <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: '#FFB59D', marginBottom: 4 }}>
-                  Plan details:
+                  Next Renewal:
                 </Text>
                 <Text className="font-app text-[14px]" style={{ fontWeight: '500', color: '#FFFFFF' }}>
-                  {sub.planName}
+                  {new Date(sub.renewalDate).toLocaleDateString()}
                 </Text>
               </View>
-              <TouchableOpacity 
-                style={{ paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'transparent', borderRadius: 9999, borderWidth: 1.5, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}
-              >
+              <TouchableOpacity style={{ paddingHorizontal: 20, paddingVertical: 8, backgroundColor: 'transparent', borderRadius: 9999, borderWidth: 1.5, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
                 <Text className="font-app text-[12px]" style={{ fontWeight: '600', color: '#FFFFFF' }}>Change</Text>
               </TouchableOpacity>
             </View>
@@ -173,7 +132,9 @@ const SubscriptionCard = ({ sub, isExpanded, onToggle }: { sub: Subscription, is
 
 export function SubscriptionsScreen() {
   const navigation = useNavigation();
-  const [expandedId, setExpandedId] = useState<string | null>('3'); // Default to Copilot expanded
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  const { data: subscriptions, isLoading } = useSubscriptions();
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -181,7 +142,6 @@ export function SubscriptionsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#FDFCF0]">
-      {/* Header */}
       <View className="flex-row items-center justify-between px-screenX py-md">
         <TouchableOpacity 
           onPress={() => navigation.goBack()}
@@ -206,14 +166,22 @@ export function SubscriptionsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {SUBSCRIPTIONS.map((sub) => (
-          <SubscriptionCard 
-            key={sub.id} 
-            sub={sub} 
-            isExpanded={expandedId === sub.id} 
-            onToggle={() => toggleExpand(sub.id)} 
-          />
-        ))}
+        {isLoading ? (
+          <ActivityIndicator color="#A1401E" size="large" style={{ marginTop: 40 }} />
+        ) : subscriptions?.length === 0 ? (
+          <Text style={{ fontFamily: 'Inter', color: '#9CA3AF', textAlign: 'center', marginTop: 40 }}>
+            You haven't added any subscriptions yet.
+          </Text>
+        ) : (
+          subscriptions?.map((sub) => (
+            <SubscriptionCard 
+              key={sub.id} 
+              sub={sub} 
+              isExpanded={expandedId === sub.id} 
+              onToggle={() => toggleExpand(sub.id)} 
+            />
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );

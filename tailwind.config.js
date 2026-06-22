@@ -21,6 +21,16 @@ const subTrackTokens = {
       secondary: "#57423C",
       inverse: "#FFFFFF",
       accent: "#A1401E",
+      muted: "#8A8D97",
+    },
+    border: {
+      warm: "#E6DBCD",
+    },
+    action: {
+      danger: {
+        surface: "#FFDAD6",
+        text: "#C71F1F",
+      },
     },
   },
   fontFamily: {

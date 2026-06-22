@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { SocialButton } from '../../components/common/SocialButton';
@@ -8,7 +9,7 @@ import { Smartphone } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
-import { signUpWithEmail } from '../../services/firebase/auth';
+import { signUpWithEmail, signInWithGoogle } from '../../services/firebase/auth';
 
 type SignUpScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
 
@@ -33,6 +34,14 @@ export function SignUpScreen() {
       Alert.alert('Sign Up Failed', error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      Alert.alert('Google Sign Up Failed', error.message);
     }
   };
 
@@ -109,12 +118,12 @@ export function SignUpScreen() {
             <View className="flex-row w-full gap-4">
               <SocialButton
                 title="GOOGLE"
-                onPress={() => { }}
+                onPress={handleGoogleSignUp}
                 icon={<AntDesign name="google" size={20} color="#A1401E" />}
               />
               <SocialButton
                 title="MOBILE"
-                onPress={() => { }}
+                onPress={() => navigation.navigate('PhoneLogin')}
                 icon={<Smartphone size={20} color="#A1401E" />}
               />
             </View>

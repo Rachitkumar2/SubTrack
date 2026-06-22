@@ -1,7 +1,6 @@
 import { create } from 'zustand';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { UserProfile } from '../services/firebase/auth';
 
 interface AuthState {
@@ -20,10 +19,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),
   setLoading: (isLoading) => set({ isLoading }),
   initialize: () => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const userDoc = await firestore().collection('users').doc(firebaseUser.uid).get();
           if (userDoc.exists()) {
             set({ user: userDoc.data() as UserProfile, isInitialized: true });
           } else {

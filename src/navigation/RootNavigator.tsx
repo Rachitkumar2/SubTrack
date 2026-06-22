@@ -3,12 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
+import { AddSubscriptionScreen } from '../screens/subscriptions/AddSubscriptionScreen';
 import { useAuthStore } from '../store/authStore';
 import { View, ActivityIndicator } from 'react-native';
 
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  AddSubscription: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,7 +35,14 @@ export function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Main" component={MainTabNavigator} />
+          <Stack.Group>
+            <Stack.Screen name="Main" component={MainTabNavigator} />
+            <Stack.Screen 
+              name="AddSubscription" 
+              component={AddSubscriptionScreen} 
+              options={{ presentation: 'modal' }} 
+            />
+          </Stack.Group>
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

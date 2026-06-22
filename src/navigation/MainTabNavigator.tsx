@@ -10,13 +10,7 @@ import { SettingsIcon } from '../components/icons/SettingsIcon';
 
 import { MonthlyInsightsScreen } from '../screens/dashboard/MonthlyInsightsScreen';
 
-function SettingsTab(): React.JSX.Element {
-  return (
-    <View className="flex-1 bg-background-app items-center justify-center">
-      <Text className="font-app font-bold text-text-primary text-[20px]">Settings</Text>
-    </View>
-  );
-}
+import { SettingsScreen } from '../screens/settings/SettingsScreen';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -129,7 +123,7 @@ export function MainTabNavigator(): React.JSX.Element {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsTab}
+        component={SettingsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <View
