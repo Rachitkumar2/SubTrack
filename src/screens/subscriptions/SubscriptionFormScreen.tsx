@@ -2,20 +2,29 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { useAddSubscription } from '../../hooks/useSubscriptions';
 import { BillingCycle } from '../../types/subscription.types';
 
-export function AddSubscriptionScreen() {
+type SubscriptionFormRouteProp = RouteProp<{
+  SubscriptionForm: {
+    defaultName?: string;
+    defaultCategory?: string;
+    defaultPrice?: string;
+  };
+}, 'SubscriptionForm'>;
+
+export function SubscriptionFormScreen() {
   const navigation = useNavigation();
+  const route = useRoute<SubscriptionFormRouteProp>();
   const addSubscriptionMutation = useAddSubscription();
 
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Entertainment');
+  const [name, setName] = useState(route.params?.defaultName || '');
+  const [price, setPrice] = useState(route.params?.defaultPrice || '');
+  const [category, setCategory] = useState(route.params?.defaultCategory || 'Entertainment');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('Monthly');
   const [renewalDate, setRenewalDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -121,6 +130,39 @@ export function AddSubscriptionScreen() {
                 value={price}
                 onChangeText={setPrice}
               />
+            </View>
+
+            <View style={{ marginBottom: 24 }}>
+              <Text className="font-app text-[14px] font-semibold text-text-secondary mb-2 ml-1">
+                Category
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+                <View style={{ flexDirection: 'row', paddingHorizontal: 4 }}>
+                  {['Entertainment', 'Software', 'Health', 'Utilities', 'Other'].map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      onPress={() => setCategory(cat)}
+                      style={{
+                        paddingVertical: 10,
+                        paddingHorizontal: 16,
+                        borderWidth: 1,
+                        borderColor: category === cat ? '#A1401E' : '#E6DBCD',
+                        backgroundColor: category === cat ? '#FFF4F1' : '#FFFFFF',
+                        borderRadius: 20,
+                        marginRight: 8,
+                      }}
+                    >
+                      <Text style={{ 
+                        fontFamily: 'Inter', 
+                        fontWeight: category === cat ? '600' : '500',
+                        color: category === cat ? '#A1401E' : '#57423C'
+                      }}>
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
 
             <View style={{ marginBottom: 24 }}>

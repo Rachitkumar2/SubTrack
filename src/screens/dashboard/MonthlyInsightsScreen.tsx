@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, MoreHorizontal, TrendingUp } from 'lucide-react-native';
-import { BarChart } from 'react-native-gifted-charts';
+import { PieChart } from 'react-native-gifted-charts';
 import { useNavigation } from '@react-navigation/native';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { useTrackingStats } from '../../hooks/useTrackingStats';
@@ -10,32 +10,7 @@ import { useTrackingStats } from '../../hooks/useTrackingStats';
 export function MonthlyInsightsScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const { data: subscriptions, isLoading } = useSubscriptions();
-  const { monthlySpend } = useTrackingStats(subscriptions);
-
-  const barData = [
-    { value: 35, label: 'Mon', frontColor: '#161C27' },
-    { value: 25, label: 'Tue', frontColor: '#161C27' },
-    { value: 18, label: 'Wed', frontColor: '#161C27' },
-    { 
-      value: 40, 
-      label: 'Thr', 
-      frontColor: '#A1401E',
-      topLabelComponent: () => (
-        <View style={{ position: 'absolute', bottom: 4, left: -11, width: 36, alignItems: 'center' }}>
-          <View style={{ backgroundColor: '#FFFFFF', paddingHorizontal: 6, paddingVertical: 4, width: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 8, borderWidth: 1, borderColor: '#E7D8CF', shadowColor: 'rgba(239, 122, 83, 0.3)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 8, elevation: 4, zIndex: 10 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 12, color: '#A1401E', textAlign: 'center' }}>
-              ₹{(monthlySpend / 4).toFixed(0)}
-            </Text>
-          </View>
-          <View style={{ width: 8, height: 8, backgroundColor: '#FFFFFF', transform: [{ rotate: '45deg' }], marginTop: -5, borderRightWidth: 1, borderBottomWidth: 1, borderColor: '#E7D8CF', zIndex: 9 }} />
-        </View>
-      ),
-      labelTextStyle: { color: '#161C27', fontWeight: '700' as const } 
-    },
-    { value: 28, label: 'Fri', frontColor: '#161C27' },
-    { value: 22, label: 'Sat', frontColor: '#161C27' },
-    { value: 24, label: 'Sun', frontColor: '#161C27' },
-  ];
+  const { monthlySpend, categoryBreakdown } = useTrackingStats(subscriptions);
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#FDFCF0' }}>
@@ -65,32 +40,57 @@ export function MonthlyInsightsScreen(): React.JSX.Element {
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <Text style={{ fontFamily: 'Inter', fontWeight: '700', fontSize: 20, color: '#161C27' }}>
-            Weekly Trend
+            Spending by Category
           </Text>
         </View>
 
-        <View style={{ backgroundColor: '#FDFCF0', borderRadius: 32, padding: 24, paddingTop: 48, marginBottom: 24, borderWidth: 1, borderColor: '#E6DBCD', alignItems: 'center' }}>
-          <BarChart
-            data={barData}
-            barWidth={14}
-            spacing={22}
-            roundedTop
-            roundedBottom
-            hideRules
-            xAxisThickness={0}
-            yAxisThickness={0}
-            yAxisTextStyle={{ color: '#8A8D97', fontSize: 10, fontWeight: '500' }}
-            noOfSections={3}
-            maxValue={45}
-            stepValue={15}
-            initialSpacing={12}
-            endSpacing={12}
-            yAxisLabelWidth={30}
-            yAxisExtraHeight={40}
-            xAxisLabelTextStyle={{ color: '#8A8D97', fontSize: 12, fontWeight: '600' }}
-            dashGap={0}
-            disablePress
-          />
+        <View style={{ backgroundColor: '#FDFCF0', borderRadius: 32, padding: 24, marginBottom: 24, borderWidth: 1, borderColor: '#E6DBCD', alignItems: 'center' }}>
+          {categoryBreakdown.length > 0 ? (
+            <>
+              <PieChart
+                data={categoryBreakdown.map(cat => ({
+                  value: cat.amount,
+                  color: cat.color,
+                  text: cat.percentage > 5 ? `${cat.percentage.toFixed(0)}%` : '',
+                  textColor: '#FFFFFF',
+                  fontWeight: 'bold',
+                }))}
+                donut
+                radius={80}
+                innerRadius={50}
+                innerCircleColor="#FDFCF0"
+                centerLabelComponent={() => {
+                  return (
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                      <Text style={{fontSize: 22, color: '#161C27', fontWeight: 'bold'}}>
+                        ₹{monthlySpend.toFixed(0)}
+                      </Text>
+                      <Text style={{fontSize: 12, color: '#8A8D97'}}>Total</Text>
+                    </View>
+                  );
+                }}
+              />
+              <View style={{ width: '100%', marginTop: 24, gap: 12 }}>
+                {categoryBreakdown.map((cat, index) => (
+                  <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: cat.color }} />
+                      <Text style={{ fontFamily: 'Inter', fontWeight: '500', fontSize: 14, color: '#161C27' }}>
+                        {cat.category}
+                      </Text>
+                    </View>
+                    <Text style={{ fontFamily: 'Inter', fontWeight: '600', fontSize: 14, color: '#161C27' }}>
+                      ₹{cat.amount.toFixed(2)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : (
+            <Text style={{ fontFamily: 'Inter', color: '#9CA3AF', textAlign: 'center', paddingVertical: 40 }}>
+              Not enough data for insights.
+            </Text>
+          )}
         </View>
 
         <View style={{ backgroundColor: '#FFFFFF', borderRadius: 32, padding: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, borderWidth: 1, borderColor: '#E6DBCD', shadowColor: 'rgba(0, 0, 0, 0.04)', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2 }}>

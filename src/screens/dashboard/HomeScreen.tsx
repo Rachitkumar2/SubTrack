@@ -1,16 +1,29 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import md5 from 'md5';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, User, LogOut } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { signOut } from '../../services/firebase/auth';
+import { useAuthStore } from '../../store/authStore';
 import { useSubscriptions } from '../../hooks/useSubscriptions';
 import { useTrackingStats } from '../../hooks/useTrackingStats';
 
 export function HomeScreen(): React.JSX.Element {
   const navigation = useNavigation<any>();
+  const { user } = useAuthStore();
   const { data: subscriptions, isLoading } = useSubscriptions();
   const { monthlySpend, upcomingRenewals } = useTrackingStats(subscriptions);
+  const [imageError, setImageError] = useState(false);
+
+  const getAvatarUrl = () => {
+    if (user?.photoURL) return user.photoURL;
+    if (user?.email) {
+      const hash = md5(user.email.toLowerCase().trim());
+      return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
+    }
+    return null;
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background-app">
@@ -22,11 +35,24 @@ export function HomeScreen(): React.JSX.Element {
         {/* ── Header ── */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, paddingBottom: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#3D2E1E', borderWidth: 2, borderColor: 'rgba(235,123,86,0.2)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <User color="#C9A87E" size={24} />
-            </View>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Profile')}
+              style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#3D2E1E', borderWidth: 2, borderColor: 'rgba(235,123,86,0.2)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+            >
+              {getAvatarUrl() && !imageError ? (
+                <Image 
+                  source={{ uri: getAvatarUrl()! }} 
+                  style={{ width: '100%', height: '100%' }} 
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <Text style={{ color: '#C9A87E', fontFamily: 'Inter', fontWeight: '700', fontSize: 20 }}>
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </Text>
+              )}
+            </TouchableOpacity>
             <Text style={{ fontFamily: 'Inter', fontWeight: '700', fontSize: 20, color: '#0C111D', letterSpacing: -0.3 }}>
-              My Dashboard
+              Hello, {user?.name?.split(' ')[0] || 'User'}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -110,7 +136,7 @@ export function HomeScreen(): React.JSX.Element {
         {/* ── All Subscriptions Section ── */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <Text style={{ fontFamily: 'Inter', fontWeight: '700', fontSize: 20, color: '#0C111D' }}>All Subscriptions</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Subscriptions')} style={{ paddingHorizontal: 16, paddingVertical: 6, backgroundColor: '#FFFFFF', borderRadius: 9999, borderWidth: 1, borderColor: '#E5E7EB', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('Subs')} style={{ paddingHorizontal: 16, paddingVertical: 6, backgroundColor: '#FFFFFF', borderRadius: 9999, borderWidth: 1, borderColor: '#E5E7EB', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 }}>
             <Text style={{ fontFamily: 'Inter', fontWeight: '600', fontSize: 14, color: '#0C111D' }}>View all</Text>
           </TouchableOpacity>
         </View>

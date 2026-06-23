@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { User, CreditCard, Landmark, Bell, Moon, Shield, Download, Lock, LogOut, ChevronRight } from 'lucide-react-native';
 import { signOut } from '../../services/firebase/auth';
+import { useSubscriptions } from '../../hooks/useSubscriptions';
 
 export function SettingsScreen() {
   const navigation = useNavigation();
+  const { data: subscriptions } = useSubscriptions();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
@@ -22,8 +24,6 @@ export function SettingsScreen() {
           onPress: async () => {
             try {
               await signOut();
-              // Navigation to auth is typically handled by the root navigator listening to auth state changes.
-              // If not, we can manually navigate, but we assume the state listener unmounts this stack.
             } catch (error: any) {
               Alert.alert('Error', error.message || 'Failed to log out');
             }
@@ -31,6 +31,24 @@ export function SettingsScreen() {
         }
       ]
     );
+  };
+
+  const handleExportData = async () => {
+    try {
+      if (!subscriptions || subscriptions.length === 0) {
+        Alert.alert('No Data', 'You have no subscriptions to export.');
+        return;
+      }
+      
+      const exportData = JSON.stringify(subscriptions, null, 2);
+      
+      await Share.share({
+        message: exportData,
+        title: 'SubTrack Export',
+      });
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to export data');
+    }
   };
 
   const renderSectionHeader = (title: string) => (
@@ -97,17 +115,17 @@ export function SettingsScreen() {
           {renderRow({
             icon: User,
             label: 'Profile',
-            onPress: () => {},
+            onPress: () => (navigation as any).navigate('Profile'),
           })}
           {renderRow({
             icon: CreditCard,
             label: 'Payment Methods',
-            onPress: () => {},
+            onPress: () => Alert.alert('Coming Soon', 'Payment methods will be available in the next update.'),
           })}
           {renderRow({
             icon: Landmark,
             label: 'Connected Banks',
-            onPress: () => {},
+            onPress: () => Alert.alert('Coming Soon', 'Bank connection will be available in the next update.'),
             isLast: true,
           })}
         </View>
@@ -146,17 +164,17 @@ export function SettingsScreen() {
           {renderRow({
             icon: Shield,
             label: 'Security Settings',
-            onPress: () => {},
+            onPress: () => (navigation as any).navigate('Security'),
           })}
           {renderRow({
             icon: Download,
             label: 'Export Data',
-            onPress: () => {},
+            onPress: handleExportData,
           })}
           {renderRow({
             icon: Lock,
             label: 'Privacy Policy',
-            onPress: () => {},
+            onPress: () => (navigation as any).navigate('Privacy'),
             isLast: true,
           })}
         </View>

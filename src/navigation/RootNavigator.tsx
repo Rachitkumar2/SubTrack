@@ -3,7 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
-import { AddSubscriptionScreen } from '../screens/subscriptions/AddSubscriptionScreen';
+import { AddSubscriptionNavigator } from './AddSubscriptionNavigator';
+import { ProfileScreen } from '../screens/settings/ProfileScreen';
+import { SecurityScreen } from '../screens/settings/SecurityScreen';
+import { PrivacyScreen } from '../screens/settings/PrivacyScreen';
 import { useAuthStore } from '../store/authStore';
 import { View, ActivityIndicator } from 'react-native';
 
@@ -11,6 +14,9 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   AddSubscription: undefined;
+  Profile: undefined;
+  Security: undefined;
+  Privacy: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -39,9 +45,12 @@ export function RootNavigator() {
             <Stack.Screen name="Main" component={MainTabNavigator} />
             <Stack.Screen 
               name="AddSubscription" 
-              component={AddSubscriptionScreen} 
+              component={AddSubscriptionNavigator} 
               options={{ presentation: 'modal' }} 
             />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Security" component={SecurityScreen} />
+            <Stack.Screen name="Privacy" component={PrivacyScreen} />
           </Stack.Group>
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />

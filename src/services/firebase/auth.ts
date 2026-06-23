@@ -9,12 +9,7 @@ GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
 });
 
-export interface UserProfile {
-  uid: string;
-  name: string;
-  email: string;
-  createdAt: string;
-}
+import { UserProfile } from '../../types/user.types';
 
 export const signUpWithEmail = async (email: string, password: string, name: string) => {
   try {
@@ -103,10 +98,16 @@ export const signInWithGoogle = async () => {
         name: user.displayName || 'User',
         email: user.email || '',
         createdAt: new Date().toISOString(),
+        photoURL: user.photoURL || undefined,
       };
       await userDocRef.set(userProfile);
     } else {
       userProfile = userDoc.data() as UserProfile;
+      // If the existing user doesn't have a photoURL but Google provided one, update it
+      if (!userProfile.photoURL && user.photoURL) {
+        userProfile.photoURL = user.photoURL;
+        await userDocRef.update({ photoURL: user.photoURL });
+      }
     }
     return userProfile;
   } catch (error: any) {
